@@ -1,0 +1,5 @@
+dataset,ASVs,total_reads,prey_ASVs,prey_reads,samples_with_prey,prey_taxa_any_read,prey_taxa_strict
+new_minBoot80,2693,143092102,1557,106644471,96,102,74
+new_minBoot50,2693,143092102,1877,125030111,96,114,79
+original_minBoot50,27965,124006783,19252,95685712,96,112,79
+original_minBoot80,27965,124006783,15333,74716335,96,92,70

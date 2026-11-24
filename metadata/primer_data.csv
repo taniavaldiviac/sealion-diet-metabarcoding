@@ -1,0 +1,4 @@
+name,locus_shorthand,seq_f,primer_length_f,seq_r,primer_length_r,amplicon_legth,F_qual,R_qual,max_amplicon_length,min_amplicon_length,max_trim_F,max_trim_R,overlap,db_name,known_hashes_name
+CE16,CE,GACGAGAAGACCCTAWTGAGCT,22,AAATTACGCTGTTATCCCT,19,313,30,30,314,150,,,,16S_ceph_taxonomy.fasta,16S_ceph_prev_hashes.csv
+CH16,CH,CGAGAAGACCCTRTGGAGCT,20,CCTNGGTCGCCCCAAC,16,188,30,30,200,175,,,12,16S_chor_taxonomy.fasta,16S_chor_prev_hashes.csv
+EU18,EU,GTACACACCGCCCGTC,16,TGCAGGTTCACCTAC,15,233,30,10,233,150,,,,18S_euk_taxonomy.fasta,18S_euk_prev_hashes.csv

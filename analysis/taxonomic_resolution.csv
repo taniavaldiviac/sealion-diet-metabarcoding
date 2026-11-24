@@ -1,0 +1,13 @@
+dataset,level,pct_ASVs,pct_reads
+new_minBoot80,Family,70.6,93.1
+new_minBoot80,Genus,63.5,80.5
+new_minBoot80,Species,50,69.6
+new_minBoot50,Family,82.8,94.4
+new_minBoot50,Genus,79.4,93.4
+new_minBoot50,Species,69.6,83.5
+original_minBoot50,Family,72.3,81.8
+original_minBoot50,Genus,68.1,76.7
+original_minBoot50,Species,70,79.9
+original_minBoot80,Family,60.8,67.5
+original_minBoot80,Genus,54.1,59.8
+original_minBoot80,Species,52.2,61.5

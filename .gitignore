@@ -1,0 +1,9 @@
+*.fastq
+*.fastq.gz
+*.fq.gz
+work/
+reference/
+*.RData
+*.Rdata
+.Rhistory
+.DS_Store
