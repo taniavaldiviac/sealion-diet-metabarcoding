@@ -22,6 +22,8 @@
 - [Key results](#key-results)
 - [Pipeline at a glance](#pipeline-at-a-glance)
 - [Amplicon and sequencing](#amplicon-and-sequencing)
+- [Reference database](#reference-database)
+- [Gulf of California fish filter](#gulf-of-california-fish-filter)
 - [Quick start](#quick-start)
 - [Step-by-step parameters](#step-by-step-parameters)
 - [Curation and detection rules](#curation-and-detection-rules)
@@ -66,11 +68,12 @@ Main analysis: minBoot 80, a prey counted as present when it makes up ≥ 0.1% o
 
 ```mermaid
 flowchart LR
+    R0[00 · Reference database<br/>GenBank → in-silico PCR<br/>→ NCBI taxonomy] -.-> E
     A[Raw FASTQ<br/>96 scats, 2×150 bp<br/>CH16 + CE16 + EU18 pooled] --> B[01 · cutadapt<br/>linked primers at both ends<br/>keeps only CH16 pairs]
     B --> C[02 · DADA2<br/>filter · error model · denoise<br/>merge with trimOverhang]
     C --> D[Chimera removal<br/>+ insert length 60–100 bp]
     D --> E[assignTaxonomy<br/>GenBank chordate 16S<br/>minBoot 80 / 50]
-    E --> F[03 · Curation<br/>Gulf of California checklist<br/>remove host and contaminants]
+    E --> F[02b · Gulf of California filter<br/>checklist for Actinopteri<br/>remove host and contaminants]
     F --> G[Detection threshold<br/>≥0.1% prey reads and ≥10 reads]
     G --> H[FO · PERMANOVA · PERMDISP<br/>subsampling · rarefaction · Spearman]
     G --> I[04 · Sensitivity<br/>≥1 vs ≥10 reads]
@@ -89,6 +92,71 @@ flowchart LR
 
 > [!IMPORTANT]
 > The insert is much shorter than the reads, so every read runs through it into the **opposite primer and the Nextera adapter**. Removing only the 5' primers leaves ~100 bp of primer and adapter in each ASV, which inflates ASV counts and distorts taxonomic assignment. Step 1 removes both.
+
+## Reference database
+
+The taxonomy reference (`16S_chor_taxonomy.fasta`) is a global chordate 16S database built from GenBank. It is **not** restricted to the regional checklist. The scripts live in `scripts/00_reference_database/`:
+
+| Step | Script | What it does |
+|---|---|---|
+| 1 | `01_download_genbank.R` | Downloads chordate mitochondrial records from GenBank with `rentrez`, in batches of 2,000 with retries. The query, record count and date are written to a log. Set your NCBI key in the `ENTREZ_KEY` environment variable. |
+| 2 | `02_virtual_pcr.R` | Runs an in-silico PCR with the Chord_16S primers (`insect::virtualPCR`, primers kept). |
+| 3 | `03_add_taxonomy.R` | Parses accession and species from each title. Removes `UNVERIFIED` records, tRNA entries, unnamed taxa (`sp.`), *Homo sapiens* and *Equus*. Retrieves NCBI taxonomy with `taxize::classification` in resumable batches and writes the 7-rank DADA2 FASTA (`Kingdom;Phylum;Class;Order;Family;Genus;Genus species`). |
+| 4 | `04_checklist_coverage.R` | Measures how much of the Gulf of California fish checklist the reference covers, and counts sequences by class. |
+
+```bash
+export ENTREZ_KEY=<your NCBI API key>
+Rscript scripts/00_reference_database/01_download_genbank.R reference/genbank_chordata_mt.fasta
+Rscript scripts/00_reference_database/02_virtual_pcr.R reference/genbank_chordata_mt.fasta reference/chord16S_amplicons.fasta
+Rscript scripts/00_reference_database/03_add_taxonomy.R reference/chord16S_amplicons.fasta reference/16S_chor_taxonomy.fasta reference/taxonomy_batches
+Rscript scripts/00_reference_database/04_checklist_coverage.R reference/16S_chor_taxonomy.fasta metadata/gulf_of_california_fish_checklist.csv reference_database/
+```
+
+**The database used in the study** has 142,689 sequences, 21,686 species and 6,397 genera. By class: Amphibia 39,903, Actinopteri 36,873, Mammalia 28,523, Lepidosauria 16,115, Aves 7,188, Chondrichthyes 3,176, and others (`reference_database/reference_sequences_by_class.csv`).
+
+**Coverage of the Gulf of California fish checklist:**
+
+| Level | In checklist | With a reference sequence | % |
+|---|---|---|---|
+| Species | 833 | 332 | 39.9 |
+| Genus | 432 | 345 | 79.9 |
+
+The per-species list is in `reference_database/checklist_coverage_by_species.csv`. Checklist species without a reference sequence can be misassigned to a congener; this is why the regional filter below truncates such labels to genus.
+
+> [!NOTE]
+> Steps 1–3 depend on GenBank and NCBI taxonomy at the time of download. Re-running them today will produce a slightly different database. The exact database used in the study will be archived on Zenodo (*DOI to be added*).
+
+## Gulf of California fish filter
+
+`scripts/02b_gulf_checklist_filter.R` is applied after `assignTaxonomy`:
+
+- **Actinopteri:** a species-level label is kept only if the species is in the Gulf of California fish checklist (`metadata/gulf_of_california_fish_checklist.csv`; Robertson *et al.* 2024). Otherwise the label is truncated to genus (`Genus sp`).
+- **Other classes:** not filtered by the checklist.
+- **Non-prey taxa are flagged:**
+  - host: *Zalophus*;
+  - humans and domestic vertebrates: *Homo*, *Bos*, *Gallus*, *Sus*, *Canis*;
+  - freshwater: *Oreochromis*.
+- **No genus:** ASVs without a genus assignment are excluded from the prey tables.
+
+The script writes an audit table (`results/CH_taxonomy_minBoot80_curated.csv`) with the assigned label, the curated label and the action taken for every ASV.
+
+```bash
+Rscript scripts/02b_gulf_checklist_filter.R results/CH_taxonomy_minBoot80.csv \
+  metadata/gulf_of_california_fish_checklist.csv results/CH_taxonomy_minBoot80_curated.csv
+```
+
+Result at minBoot 80 (2,693 ASVs):
+
+| Action | ASVs |
+|---|---|
+| Kept at species | 562 |
+| Truncated to genus (not in checklist) | 679 |
+| Genus only | 322 |
+| Excluded: no genus | 977 |
+| Non-prey (host, human, domestic) | 152 |
+| Non-prey (freshwater) | 1 |
+
+The largest truncations are *Mulloidichthys vanicolensis* (307 ASVs), *Trichiurus lepturus* (86), *Aulopus filamentosus* (54), *Triphoturus mexicanus* (48), *Paranthias colonus* (37) and *Sardinops caeruleus* (35). The same rules are applied inside `03_diet_analysis.R`.
 
 ## Quick start
 
@@ -127,6 +195,7 @@ Rscript scripts/04_compare_read_thresholds.R analysis/ metadata/sample_metadata.
 | 2 · Denoise and merge | `scripts/02_dada2.R` | Per-sample `dada`; `mergePairs(minOverlap = 20, maxMismatch = 0, trimOverhang = TRUE)` |
 | 2 · Chimeras and length | `scripts/02_dada2.R` | `removeBimeraDenovo(method = "consensus")`; insert 60–100 bp |
 | 2 · Taxonomy | `scripts/02_dada2.R` | `assignTaxonomy(tryRC = TRUE, outputBootstraps = TRUE)`; exported at minBoot **80** (main) and 50 |
+| 2b · Regional filter | `scripts/02b_gulf_checklist_filter.R` | Gulf of California checklist for Actinopteri; flags non-prey taxa; writes an audit table |
 | 3 · Diet analyses | `scripts/03_diet_analysis.R` | Jaccard, 999 permutations, prey present in ≥ 5% of samples (also unfiltered); 999 balanced subsamples; rarefaction to 4,000 prey reads |
 | 4 · Sensitivity | `scripts/04_compare_read_thresholds.R` | Presence with ≥ 1 read vs ≥ 10 reads (minBoot 80) |
 | extra | `scripts/extra/01b_trim_3prime_from_5prime_trimmed.sh` | Alternative to step 1 for reads already trimmed at 5' (used to cross-check step 1) |
@@ -154,8 +223,10 @@ Rscript scripts/04_compare_read_thresholds.R analysis/ metadata/sample_metadata.
 sealion-diet-metabarcoding/
 ├── run_pipeline.sh                 # runs steps 1–4
 ├── scripts/
+│   ├── 00_reference_database/      # GenBank download, in-silico PCR, NCBI taxonomy, checklist coverage
 │   ├── 01_trim_primers_from_raw.sh
 │   ├── 02_dada2.R
+│   ├── 02b_gulf_checklist_filter.R
 │   ├── 03_diet_analysis.R
 │   ├── 04_compare_read_thresholds.R
 │   └── extra/01b_trim_3prime_from_5prime_trimmed.sh
@@ -163,7 +234,8 @@ sealion-diet-metabarcoding/
 │   ├── sample_metadata.csv         # year, reproductive season, site
 │   ├── gulf_of_california_fish_checklist.csv
 │   └── primer_data.csv
-├── results/                        # ASV table, hash key (.csv/.fasta), taxonomy (minBoot 80/50), bootstraps
+├── reference_database/             # checklist coverage and sequences per class
+├── results/                        # ASV table, hash key, taxonomy (minBoot 80/50), bootstraps, curated taxonomy
 ├── analysis/                       # prey matrices, FO, PERMANOVA/PERMDISP, subsampling, Spearman, figures
 └── logs/                           # read tracking, parameters, quality and error plots, sessionInfo
 ```
@@ -181,6 +253,7 @@ In `analysis/`, files whose names start with `original_` re-analyse the first (2
 | vegan | 2.6-10 |
 | dplyr · tidyr · readr · tibble | 1.1.4 · 1.3.1 · 2.1.5 · 3.2.1 |
 | digest | 0.6.37 |
+| rentrez · insect · taxize · Biostrings (reference database) | see `sessionInfo` of the machine that builds it |
 
 Full session information is in `logs/sessionInfo.txt` and `analysis/sessionInfo.txt`.
 
@@ -189,7 +262,7 @@ Full session information is in `logs/sessionInfo.txt` and `analysis/sessionInfo.
 | Data | Where |
 |---|---|
 | Raw reads | SRA/ENA: *accession to be added* |
-| Reference database | GenBank chordate mitochondrial sequences, in-silico PCR with Chord_16S (`insect::virtualPCR`), NCBI taxonomy (`taxize`); 142,689 sequences, 21,686 species. Zenodo: *DOI to be added* |
+| Reference database | Built with `scripts/00_reference_database/` (see [Reference database](#reference-database)); 142,689 sequences, 21,686 species. Zenodo: *DOI to be added* |
 
 ## How to cite
 
