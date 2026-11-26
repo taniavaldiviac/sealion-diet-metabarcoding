@@ -1,10 +1,14 @@
 ## Reference database, step 1: download chordate mitochondrial sequences from GenBank.
 ## Usage: Rscript 01_download_genbank.R <out_fasta> ["<entrez query>"]
 ## An NCBI API key is read from the ENTREZ_KEY environment variable (never hard-code it).
-## Default = the query as written in the 2024 script (chordata/rdb/16S_NCBI.R). Note that it
-## says 12S[Title] and has an unbalanced parenthesis; mitochondrial genomes enter through
-## "mitochondrion[Title]". TO CONFIRM which query and date produced the published database.
-DEFAULT_QUERY <- 'Chordata[Organism] AND (12S[Title]) AND (partial[Title] OR complete[Title]) OR mitochondrion[Title])'
+## Default = the query used for the published database (2024 script chordata/rdb/16S_NCBI.R),
+## downloaded in early September 2024 (the downloaded set was saved on 11 Sep 2024).
+## As written, Entrez reads it as "(...12S...) OR mitochondrion[Title]", so in practice it returned
+## almost every record with "mitochondrion" in the title (mitogenomes and mitochondrial genes),
+## including some non-chordates. The in-silico PCR (step 2) then keeps only records with the
+## Chord_16S amplicon. For a new, chordate-only download use CHORDATE_QUERY instead.
+DEFAULT_QUERY   <- 'Chordata[Organism] AND (12S[Title]) AND (partial[Title] OR complete[Title]) OR mitochondrion[Title])'
+CHORDATE_QUERY  <- 'Chordata[Organism] AND (16S[Title] OR mitochondrion[Title] OR mitochondrial[Title])'
 
 suppressMessages(library(rentrez))
 args <- commandArgs(trailingOnly = TRUE)

@@ -99,7 +99,7 @@ The taxonomy reference (`16S_chor_taxonomy.fasta`) is a global chordate 16S data
 
 | Step | Script | What it does |
 |---|---|---|
-| 1 | `01_download_genbank.R` | Downloads chordate mitochondrial records from GenBank with `rentrez`, in batches of 2,000 with retries. The query, record count and date are written to a log. Set your NCBI key in the `ENTREZ_KEY` environment variable. |
+| 1 | `01_download_genbank.R` | Downloads mitochondrial records from GenBank with `rentrez`, in batches of 2,000 with retries. The query, record count and date are written to a log. Set your NCBI key in the `ENTREZ_KEY` environment variable. The published database used the query in the script, downloaded in early September 2024. In practice it returned almost every record with "mitochondrion" in the title, including some non-chordates, which the in-silico PCR then filters. A chordate-only query is provided for new builds. |
 | 2 | `02_virtual_pcr.R` | Runs an in-silico PCR with the Chord_16S primers (`insect::virtualPCR`, primers kept). |
 | 3 | `03_add_taxonomy.R` | Parses accession and species from each title. Removes `UNVERIFIED` records, tRNA entries, unnamed taxa (`sp.`), *Homo sapiens* and *Equus*. Retrieves NCBI taxonomy with `taxize::classification` in resumable batches and writes the 7-rank DADA2 FASTA (`Kingdom;Phylum;Class;Order;Family;Genus;Genus species`). |
 | 4 | `04_checklist_coverage.R` | Measures how much of the Gulf of California fish checklist the reference covers, and counts sequences by class. |
@@ -124,7 +124,7 @@ Rscript scripts/00_reference_database/04_checklist_coverage.R reference/16S_chor
 The per-species list is in `reference_database/checklist_coverage_by_species.csv`. Checklist species without a reference sequence can be misassigned to a congener; this is why the regional filter below truncates such labels to genus.
 
 > [!NOTE]
-> Steps 1–3 depend on GenBank and NCBI taxonomy at the time of download. Re-running them today will produce a slightly different database. The exact database used in the study will be archived on Zenodo (*DOI to be added*).
+> Steps 1–3 depend on GenBank and NCBI taxonomy at the time of download (September 2024 for the published database; reference finalised on 22 September 2024). Re-running them today will produce a different database. The exact database used in the study will be archived on Zenodo (*DOI to be added*).
 
 ## Gulf of California fish filter
 
