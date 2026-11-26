@@ -132,7 +132,7 @@ The per-species list is in `reference_database/checklist_coverage_by_species.csv
 `scripts/02b_gulf_checklist_filter.R` is applied after `assignTaxonomy`:
 
 - **Actinopteri:** a species-level label is kept only if the species is in the Gulf of California fish checklist (`metadata/gulf_of_california_fish_checklist.csv`). Otherwise the label is truncated to genus (`Genus sp`).
-- **Checklist source:** the Gulf of California species list of [Shorefishes of the Tropical Eastern Pacific](https://biogeodb.stri.si.edu/sftep/en/pages) (Robertson & Allen, Smithsonian Tropical Research Institute), downloaded in September 2024. It has 833 species and 432 genera and focuses on shore and coastal fishes.
+- **Checklist source:** the Gulf of California species list of [Shorefishes of the Tropical Eastern Pacific](https://biogeodb.stri.si.edu/sftep/en/pages) (Robertson & Allen 2024, version 3.0, Smithsonian Tropical Research Institute), downloaded in September 2024. It has 833 species and 432 genera and focuses on shore and coastal fishes.
 - **Other classes:** not filtered by the checklist.
 - **Non-prey taxa are flagged:**
   - host: *Zalophus*;
@@ -204,7 +204,7 @@ Rscript scripts/04_compare_read_thresholds.R analysis/ metadata/sample_metadata.
 
 ## Curation and detection rules
 
-- 🐟 **Checklist:** species-level assignments within Actinopteri that are not in the Gulf of California fish checklist ([SFTEP](https://biogeodb.stri.si.edu/sftep/en/pages); Robertson & Allen, STRI) are reported at genus level (`Genus sp`).
+- 🐟 **Checklist:** species-level assignments within Actinopteri that are not in the Gulf of California fish checklist ([SFTEP](https://biogeodb.stri.si.edu/sftep/en/pages); Robertson & Allen 2024) are reported at genus level (`Genus sp`).
 - 🚫 **Non-prey:** removed taxa are the host (*Zalophus*), humans, domestic vertebrates (*Bos*, *Gallus*, *Sus*, *Canis*) and freshwater taxa (*Oreochromis*). ASVs without a genus assignment are excluded from the prey tables.
 - 📏 **Detection thresholds**, applied per sample:
 
@@ -282,7 +282,7 @@ If you use this pipeline, please cite the article (citation to be updated on pub
 ## References
 
 - Deagle B. E., Kirkwood R., Jarman S. N. (2009). Analysis of Australian fur seal diet by pyrosequencing prey DNA in faeces. *Molecular Ecology* 18: 2022–2038.
-- Robertson D. R., Allen G. R. Shorefishes of the Tropical Eastern Pacific: online information system. Smithsonian Tropical Research Institute, Balboa, Panamá. https://biogeodb.stri.si.edu/sftep/en/pages (accessed September 2024).
+- Robertson D. R. & Allen G. R. (2024). Shorefishes of the Tropical Eastern Pacific: online information system. Version 3.0. Smithsonian Tropical Research Institute, Balboa, Panamá. https://biogeodb.stri.si.edu/sftep/en/pages (accessed September 2024).
 
 ## License
 

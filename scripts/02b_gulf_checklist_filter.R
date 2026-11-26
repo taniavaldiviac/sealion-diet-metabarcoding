@@ -1,6 +1,7 @@
 ## Step 2b: Gulf of California fish filter and removal of non-prey taxa.
-## Checklist source: Shorefishes of the Tropical Eastern Pacific online information system
-## (Robertson D. R. & Allen G. R., Smithsonian Tropical Research Institute),
+## Checklist source: Robertson D. R. & Allen G. R. (2024). Shorefishes of the Tropical Eastern
+## Pacific: online information system. Version 3.0. Smithsonian Tropical Research Institute,
+## Balboa, Panamá.
 ## https://biogeodb.stri.si.edu/sftep/en/pages — species list for the Gulf of California,
 ## downloaded in September 2024 (metadata/gulf_of_california_fish_checklist.csv).
 ## Bony-fish (Actinopteri) species-level labels are kept only if the species is in the regional
