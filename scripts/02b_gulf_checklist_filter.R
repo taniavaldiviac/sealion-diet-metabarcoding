@@ -5,7 +5,7 @@
 ## https://biogeodb.stri.si.edu/sftep/en/pages — species list for the Gulf of California,
 ## downloaded in September 2024 (metadata/gulf_of_california_fish_checklist.csv).
 ## Bony-fish (Actinopteri) species-level labels are kept only if the species is in the regional
-## checklist (Robertson et al. 2024); otherwise the assignment is truncated to genus ("Genus sp").
+## checklist (Robertson & Allen 2024); otherwise the assignment is truncated to genus ("Genus sp").
 ## Other classes are not filtered by the checklist. Host, human, domestic and freshwater taxa are
 ## flagged as non-prey. The same rules are applied inside 03_diet_analysis.R; this script writes
 ## the audit table so every change can be inspected.
