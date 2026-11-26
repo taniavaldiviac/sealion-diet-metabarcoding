@@ -1,4 +1,8 @@
 ## Reference database, step 4: coverage of the Gulf of California fish checklist.
+## Checklist source: Shorefishes of the Tropical Eastern Pacific online information system
+## (Robertson D. R. & Allen G. R., Smithsonian Tropical Research Institute),
+## https://biogeodb.stri.si.edu/sftep/en/pages — species list for the Gulf of California,
+## downloaded in September 2024 (metadata/gulf_of_california_fish_checklist.csv).
 ## Reports which checklist species and genera have at least one reference sequence.
 ## Usage: Rscript 04_checklist_coverage.R <reference_fasta> <checklist_csv> <out_dir>
 suppressMessages({ library(dplyr); library(readr); library(stringr) })
