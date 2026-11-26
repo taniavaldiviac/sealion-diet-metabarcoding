@@ -1,4 +1,4 @@
-<h1 align="center">🦭 sealion-diet-metabarcoding</h1>
+<h1 align="center">sealion-diet-metabarcoding</h1>
 
 <p align="center">
   <b>Fecal eDNA metabarcoding pipeline for the diet of the California sea lion (<i>Zalophus californianus</i>) in the Gulf of California</b>
